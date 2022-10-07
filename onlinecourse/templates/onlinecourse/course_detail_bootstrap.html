@@ -28,7 +28,7 @@
                         {% csrf_token %}
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Username" name="username" >
-                            <input type="password" class="form-control" placeholder="Username" name="psw" >
+                            <input type="password" class="form-control" placeholder="Password" name="psw" >
                             <button class="btn btn-primary" type="submit">Login</button>
                             <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
                         </div>
@@ -41,6 +41,7 @@
 
     <!-- Page content -->
     <div class="container-fluid">
+        {% if user.is_authenticated %}
             <h2>{{ course.name }}</h2>
             <div class="card-columns-vertical">
                 {% for lesson in course.lesson_set.all %}
@@ -54,82 +55,47 @@
             <!-- <HINT> Use Bootstrap Collapse to hide exam first, more details could be found here
             https://www.w3schools.com/bootstrap4/bootstrap_collapse.asp-->
 
-            <!--
-
-            A collapse example here:
+            <button class="btn btn-primary btn-block" data-toggle="collapse" data-target="#exam">Start Exam</button>
             <div id="exam" class="collapse">
-                Click to expand elements within the collapse div
-            </div>
+                <!-- <HINT> If user is authenticated, show course exam with a list of question -->
 
-            -->
+                <!-- <HINT> Each example will have many questions -->
 
-            <!-- <HINT> If user is authenticated, show course exam with a list of question -->
-                <div id="exam" class="collapse">
-            {% if user.is_authenticated %}
-            <form id="questionform" action="" method="post">
-                <!--Questions-->
-                 {% for question in course.question_set.all %}
-                       <div id="accordion">
-                       <div class="card mt-1">
-                            <div class="card-header" style="cursor: pointer;" data-toggle="collapse" href="#collapseTwo"><h5>{{ question.question_text}}</h5></div>
-                            {% csrf_token %}
-                            <div id="collapseTwo" class="collapse" data-parent="#accordion" class="form-group">
-                               <!--Choices-->
-                                {% for choice in question.choice_set.all %}
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input type="checkbox" name="choice_{{choice.id}}"
-                                               class="form-check-input" id="{{choice.id}}"
-                                               value="{{choice.id}}">{{ choice.choice_text }}
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        </div>
-                        {% endfor %}
-                    <br>
-                    <input class="btn btn-success btn-block" type="submit" value="Submit">
-            </form>
-        </div>
-            <!-- <HINT> Each example will have many questions -->
-
-            <!-- <HINT> Each question will have many choices -->
+                <!-- <HINT> Each question will have many choices -->
 
 
-            <!-- <HINT> Create a form to collect the selected choices for all questions -->
-            <!-- <HINT> For each question choice, you may create a checkbox input like
-            <input type="check" name="choice_{{choice.id}}" id="{{choice.id}}" ...>
-            -->
+                <!-- <HINT> Create a form to collect the selected choices for all questions -->
+                <!-- <HINT> For each question choice, you may create a checkbox input like
+                <input type="check" name="choice_{{choice.id}}" id="{{choice.id}}" ...>
+                -->
 
-            <!-- A choice submission form example
-            <form id="questionform" action="point to a submit view" method="post">
-                        ... for each question in the course ...
+                <!-- A choice submission form example -->
+
+                <form id="questionform" action="{% url 'onlinecourse:submit' course.id %}" method="post">
+                    {% csrf_token %}
+                    {% for question in course.question_set.all %}
                         <div class="card mt-1">
                             <div class="card-header"><h5>{{ question.question_text}}</h5></div>
-                            {% csrf_token %}
                             <div class="form-group">
-                               ... for each choice in the question ...
+                            {% for choice in question.choice_set.all %}
                                 <div class="form-check">
                                     <label class="form-check-label">
                                         <input type="checkbox" name="choice_{{choice.id}}"
-                                               class="form-check-input" id="{{choice.id}}"
-                                               value="{{choice.id}}">{{ choice.choice_text }}
+                                            class="form-check-input" id="{{choice.id}}"
+                                            value="{{choice.id}}">{{ choice.choice_text }}
                                     </label>
                                 </div>
+                            {% endfor %}
                             </div>
                         </div>
+                    {% endfor %}
                     <input class="btn btn-success btn-block" type="submit" value="Submit">
-            </form> -->
+                </form>
 
-            {% else %}
-
-            <div class='alert-info'>You are not authenticated to view the exam.</div>
-                
-            {% endif %}
-
-            <!--Check here to see more details Bootstrap checkbox
-             https://www.w3schools.com/bootstrap4/bootstrap_forms_inputs.asp-->
+                <!--Check here to see more details Bootstrap checkbox
+                https://www.w3schools.com/bootstrap4/bootstrap_forms_inputs.asp-->                
+            </div>
+        {% endif %}
     </div>
 </body>
 </html>
